@@ -9,8 +9,8 @@
 void srandom (unsigned seed);  
 double dboard (int darts);
 
-#define DARTS 10000   	/* number of throws at dartboard */
-#define ROUNDS 200    	/* number of times "darts" is iterated */
+//#define DARTS 10000   	/* number of throws at dartboard */
+#define ROUNDS 100    	/* number of times "darts" is iterated */
 
 int main(int argc, char *argv[])
 {
@@ -18,7 +18,7 @@ int main(int argc, char *argv[])
    double avepi;       	/* average pi value for all iterations */
    int i, n;
    int numtasks, rank;
-   int darts;
+   int DARTS;
    double global_ave;
    // Initialize MPI environment
 
@@ -33,8 +33,8 @@ int main(int argc, char *argv[])
    double start_time = MPI_Wtime();
    for (i = 0; i < ROUNDS; i++) {
       /* Perform pi calculation on serial processor */
-      darts = atoi(argv[1]);
-      pi = dboard(darts);
+      DARTS = atoi(argv[1])/numtasks;
+      pi = dboard(DARTS);
       avepi += pi;
       }
    double end_time = MPI_Wtime();
@@ -43,15 +43,15 @@ int main(int argc, char *argv[])
    double total_time;
    MPI_Reduce(&start_time, &total_time, 1, MPI_DOUBLE, MPI_MAX, 0, MPI_COMM_WORLD);
 
-    if (rank == 0) {
-        //std::cout << "Total runtime: " << end_time - total_time << " seconds." << std::endl;
-    }   
+    /*if (rank == 0) {
+        std::cout << "Total runtime: " << end_time - total_time << " seconds." << std::endl;
+    }*/   
    
    MPI_Reduce(&avepi, &global_ave, 1, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
 
    // Print the result
    if (rank == 0) {
-   printf("%f, %f\n", total_time,
+   printf("%f,%f,", end_time - total_time,
             global_ave / numtasks/ROUNDS );
    //printf("\nReal value of PI: 3.1415926535897 \n");
 
