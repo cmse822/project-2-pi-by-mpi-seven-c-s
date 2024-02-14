@@ -33,7 +33,7 @@ int main(int argc, char *argv[])
    double start_time = MPI_Wtime();
    for (i = 0; i < ROUNDS; i++) {
       /* Perform pi calculation on serial processor */
-      DARTS = atoi(argv[1])/numtasks;
+      DARTS = atoi(argv[1])/numtasks/ROUNDS;
       pi = dboard(DARTS);
       avepi += pi;
       }
@@ -51,7 +51,7 @@ int main(int argc, char *argv[])
 
    // Print the result
    if (rank == 0) {
-   printf("%f,%f,", end_time - total_time,
+   printf("%f,%f", end_time - total_time,
             global_ave / numtasks/ROUNDS );
    //printf("\nReal value of PI: 3.1415926535897 \n");
 
