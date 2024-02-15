@@ -9,7 +9,6 @@
 void srandom (unsigned seed);  
 double dboard (int darts);
 
-//#define DARTS 10000   	/* number of throws at dartboard */
 #define ROUNDS 5    	/* number of times "darts" is iterated */
 
 int main(int argc, char *argv[])
@@ -17,22 +16,22 @@ int main(int argc, char *argv[])
    double pi;          	/* average of pi after "darts" is thrown */
    double avepi;       	/* average pi value for all iterations */
    int i, n;
-   int numtasks, rank;
-   int DARTS;
-   double global_ave;
+   int numtasks, rank; 
+   int DARTS;           // darts thrown, must be passed to the program
+   double global_ave;   // calculated pi after dividing avepi by processor count and rounds
    // Initialize MPI environment
 
    MPI_Init(&argc, &argv);
    MPI_Comm_size(MPI_COMM_WORLD, &numtasks);
    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 
-
-   // printf("Starting serial version of pi calculation using dartboard algorithm...\n");
-   srandom (rank);            /* seed the random number generator */
+   srandom (rank);            // changing the seed based on processor rank
    avepi = 0;
+
+   // times the calculation of pi
    double start_time = MPI_Wtime();
    for (i = 0; i < ROUNDS; i++) {
-      /* Perform pi calculation on serial processor */
+      // calculates pi for one round
       DARTS = atoi(argv[1])/numtasks/ROUNDS;
       pi = dboard(DARTS);
       avepi += pi;
@@ -41,24 +40,22 @@ int main(int argc, char *argv[])
    //printf("Average pi for process %d, avg =%10.12f\n",rank, avepi/ROUNDS); 
 
    double total_time;
+
+   // 
    MPI_Reduce(&start_time, &total_time, 1, MPI_DOUBLE, MPI_MAX, 0, MPI_COMM_WORLD);
 
-    /*if (rank == 0) {
-        std::cout << "Total runtime: " << end_time - total_time << " seconds." << std::endl;
-    }*/   
-   
+   // adds all of the processor results together   
    MPI_Reduce(&avepi, &global_ave, 1, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
 
-   // Print the result
+   // Prints the result to console
    if (rank == 0) {
    printf("%f,%f", end_time - total_time,
             global_ave / numtasks/ROUNDS );
-   //printf("\nReal value of PI: 3.1415926535897 \n");
-
    }
    MPI_Finalize();
-   
 }
+
+   // BELOW IS EXAMPLE CODE THAT WAS PROVIDED
 
    /*****************************************************************************
     * dboard
